@@ -8,7 +8,13 @@
 #define CLK 2
 
 //var
+//Variables liées au clic de l'encodeur
 bool clic;
+  //Varible d'anti-rebond
+uint32_t interrupt_time;
+uint32_t last_interrupt_time;
+#define BOUNCING_DELAY 200
+
 int posEncoder;
 bool rotation;
 bool refresh;
@@ -56,7 +62,7 @@ void setup(){
   
   lcd.print("Attente GO STRT");
   delay(2000);
-  
+
   lcd.setCursor(0,0);
   while(Serial.available()==0){
     //attente reception message
@@ -244,7 +250,11 @@ void affichageMenuGo(){
 }
 
 void ISR_clic(){
-  clic=true;
+  interrupt_time = millis();
+  if( (interrupt_time - last_interrupt_time) > BOUNCING_DELAY ) {
+    clic=true;
+  }
+  last_interrupt_time = interrupt_time;
 }
 
 void ISR_encoder(){
