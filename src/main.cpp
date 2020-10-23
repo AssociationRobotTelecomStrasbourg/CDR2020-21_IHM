@@ -8,11 +8,11 @@
 
 //var
 //Variables liées au clic de l'encodeur
-bool clic;
+bool clic=0;
 //Varible d'anti-rebond
 uint32_t interrupt_time;
 uint32_t last_interrupt_time;
-#define BOUNCING_DELAY 200
+uint32_t bouncing_delay;
 
 int posEncoder;
 bool rot;
@@ -44,8 +44,10 @@ void setup(){
   //Variables d'état pour navigation menu
   posEncoder = 0;
 
-  clic = false;
-
+  bouncing_delay = 400;
+  interrupt_time = 0;
+  last_interrupt_time = 0;
+  
   rot = false;
   refresh = false;
 
@@ -54,7 +56,7 @@ void setup(){
   menuTest = false; //affichage du menu test
   go = false; //affichage des infos du match
   gone = false;
-  lcd.init();                      // initialize the lcd 
+  lcd.init();// initialize the lcd 
 
   lcd.backlight();
   lcd.setCursor(3,0);
@@ -132,25 +134,7 @@ void setup(){
   attachInterrupt(digitalPinToInterrupt(SW),ISR_clic,RISING);
   attachInterrupt(digitalPinToInterrupt(CLK),ISR_encoder,CHANGE);
 
-  #ifdef debug
-    Serial.print("Lecture CLIC pre-loop1: ");
-    Serial.println(digitalRead(SW));
-    delay(400);
-    Serial.print("Lecture CLIC pre-loop2: ");
-    Serial.println(digitalRead(SW));
-    delay(400);
-  #endif
-
-  while(digitalRead(SW)){
-    //attente du clic avant de continuer
-    #ifdef debug
-      Serial.print("Lecture SW|CLIC: ");
-      Serial.print(digitalRead(SW));
-      Serial.print("|");
-      Serial.println(clic);
-      delay(400);
-    #endif
-  }
+  clic = 0;
 }
 
 
@@ -240,7 +224,7 @@ void affichageMenuGo(){
 
 void ISR_clic(){
   interrupt_time = millis();
-  if( (interrupt_time - last_interrupt_time) > BOUNCING_DELAY ) {
+  if( (interrupt_time - last_interrupt_time) > bouncing_delay ) {
     clic=true;
   }
   last_interrupt_time = interrupt_time;
