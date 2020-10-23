@@ -1,11 +1,10 @@
 #include <Arduino.h>
 #include "LiquidCrystal_I2C.h"
 
+#include "encoder.h"
+
 #define _debug 
-//Définition pins encoder
-#define SW 3
-#define DT 4
-#define CLK 2
+
 
 //var
 //Variables liées au clic de l'encodeur
@@ -16,7 +15,7 @@ uint32_t last_interrupt_time;
 #define BOUNCING_DELAY 200
 
 int posEncoder;
-bool rotation;
+bool rot;
 bool refresh;
 
 bool menu0; //affichage du menu principal
@@ -47,7 +46,7 @@ void setup(){
 
   clic = false;
 
-  rotation = false;
+  rot = false;
   refresh = false;
 
   menu0 = false; //affichage du menu principal
@@ -190,19 +189,9 @@ void loop(){
     }
   }
 
-  if(rotation){
-    rotation = false;
-    #ifdef debug
-      Serial.print("Enc valeur: ");
-      Serial.println(posEncoder);
-    #endif
-    if(digitalRead(DT) == digitalRead(CLK)){
-      posEncoder+=1;
-    }
-    else{
-      posEncoder-=1;
-    }
-  }
+  rotation(rot,posEncoder);
+
+
 }
 
 void affichageMenu0(){
@@ -258,5 +247,5 @@ void ISR_clic(){
 }
 
 void ISR_encoder(){
-  rotation = true;
+  rot = true;
 }
