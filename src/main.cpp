@@ -9,7 +9,7 @@
 //var
 //Variables liées au clic de l'encodeur
 bool clic;
-  //Varible d'anti-rebond
+//Varible d'anti-rebond
 uint32_t interrupt_time;
 uint32_t last_interrupt_time;
 #define BOUNCING_DELAY 200
