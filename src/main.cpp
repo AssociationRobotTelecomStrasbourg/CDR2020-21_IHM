@@ -1,9 +1,10 @@
 #include <Arduino.h>
 #include "LiquidCrystal_I2C.h"
 
+#include "debug.h"
 #include "encoder.h"
+#include "menus.h"
 
-#define _debug 
 
 
 //var
@@ -16,7 +17,9 @@ uint32_t bouncing_delay;
 
 int posEncoder;
 bool rot;
-bool refresh;
+bool refreshScreen;
+uint8_t menuA;
+uint8_t menuB;
 
 bool menu0; //affichage du menu principal
 bool menuGO; //affichage du menu d'attente de départ
@@ -49,7 +52,7 @@ void setup(){
   last_interrupt_time = 0;
   
   rot = false;
-  refresh = false;
+  refreshScreen = false;
 
   menu0 = false; //affichage du menu principal
   menuGO = false; //affichage du menu d'attente de départ
@@ -139,45 +142,14 @@ void setup(){
 
 
 void loop(){
-  if(posEncoder > 3){
-    posEncoder = 3;
-  }
-  else if(posEncoder <0){
-    posEncoder = 0;
-  }
-  if(clic && !menu0 && !menuGO){
-    refresh = true;
-    menu0 = true;
-    clic = false;
-    lcd.clear();
-  }
-
-  if(menu0){
-    affichageMenu0();
-  }
-
-  if(menuGO){
-    affichageMenuGo();
-    if(Serial.available()>0){
-      if(Serial.read()==0x56){
-        go = true;
-        menuGO = false;
-        lcd.clear();
-      }
-    }
-
-    if(gone){
-      lcd.setCursor(12,1);
-      lcd.clear();
-      lcd.print("! GO !");
-    }
-  }
-
-  rotation(rot,posEncoder);
+  //0x66 vers strat -> attente tirette
+  rotation(rot,posEncoder); //fonction de decodage de l'encodeur incremental
+  menuMEF(posEncoder,clic,menuA,menuB,refreshScreen,lcd);
+  displayCursor(posEncoder,menuA,lcd);
 
 
 }
-
+/* 
 void affichageMenu0(){
   if(refresh){
     delay(200);
@@ -215,13 +187,12 @@ void affichageMenuGo(){
     lcd.setCursor(5,2);
     lcd.print("demarrage");
     Serial.write(0x66); //Signifie à la Teensy Strat qu'elle doit lire la valeur de la tirette de départ
-    Serial.write(0x66);
     #ifdef debug
       Serial.println("MENU GO");
     #endif
   }
 }
-
+ */
 void ISR_clic(){
   interrupt_time = millis();
   if( (interrupt_time - last_interrupt_time) > bouncing_delay ) {

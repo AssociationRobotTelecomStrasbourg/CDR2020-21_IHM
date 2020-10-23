@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "menus.h"
 #include "LiquidCrystal_I2C.h"
+#include "debug.h"
 /* 
 Plan de navigation /menus
 --------------------------------------
@@ -33,6 +34,13 @@ Ecran initialisation (0:0) -> Menu principal(1:0):
  */
 void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool refreshScreen, LiquidCrystal_I2C &lcd){
     //(A:B) = (0:0) -> Menu d'initialisation
+    #ifdef debug
+        Serial.print("MenuA|MenuB: ");
+        Serial.print(menuA);
+        Serial.print("|");
+        Serial.println(menuB);
+        delay(100);
+    #endif
     if(menuA == 0 && menuB == 0 && clic){
         //On sort de l'ecran d'initialisation
         menuA = 1;
@@ -45,6 +53,7 @@ void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool r
             /* Pour éviter l'effet de clignotement, on doit faire en sorte 
             que les caractères fixes de l'écran ne soit rafraichis qu'une seule fois, a chaque transition */
             refreshScreen = 0;
+            lcd.clear();
             displayMenu0(lcd);
         }
         if(clic){
@@ -76,6 +85,7 @@ void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool r
         //Menu Test principal
         if(refreshScreen){
             refreshScreen = 0;
+            lcd.clear();
             displayMenuTest0(lcd);
         }
         if(clic){
@@ -111,12 +121,20 @@ void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool r
     }
 }
 
-void displayCursor(const int &posEncoder, const uint8_t &menuA, LiquidCrystal_I2C &lcd){
+void displayCursor(int &posEncoder, const uint8_t &menuA, LiquidCrystal_I2C &lcd){
     //Fonction permettant d'afficher dynamiquement le curseur hors de l'écran d'initialisation
+    //Gère egalement l'intervalle de validité de posEncoder
     if(menuA!=0){
         lcd.cursor_on();
         lcd.setCursor(0, posEncoder);
     }
+    if(posEncoder < 0){
+        posEncoder = 0;
+    }
+    else if(posEncoder > 3){
+        posEncoder = 4;
+    }
+    
 }
 
 void displayMenu0(LiquidCrystal_I2C &lcd){
