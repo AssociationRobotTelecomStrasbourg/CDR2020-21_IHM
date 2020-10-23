@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include "LiquidCrystal_I2C.h"
-#include "ISRs.h"
 
 #define _debug 
 //Définition pins encoder
@@ -11,8 +10,10 @@
 //var
 //Variables liées au clic de l'encodeur
 bool clic;
+  //Varible d'anti-rebond
 uint32_t interrupt_time;
 uint32_t last_interrupt_time;
+#define BOUNCING_DELAY 200
 
 int posEncoder;
 bool rotation;
@@ -25,6 +26,9 @@ bool go; //Attente début du match
 bool gone; //Indicateur début du match (0 si en attente, 1 si commencé)
 void affichageMenu0();
 void affichageMenuGo();
+//Proto ISR
+void ISR_clic();
+void ISR_encoder();
 
 LiquidCrystal_I2C lcd(0x27,20,4);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
@@ -126,7 +130,7 @@ void setup(){
   pinMode(DT, INPUT);
   pinMode(CLK, INPUT);
 
-  attachInterrupt(digitalPinToInterrupt(SW),ISR_clic(clic,interrupt_time,last_interrupt_time),RISING);
+  attachInterrupt(digitalPinToInterrupt(SW),ISR_clic,RISING);
   attachInterrupt(digitalPinToInterrupt(CLK),ISR_encoder,CHANGE);
 
   #ifdef debug
@@ -243,6 +247,14 @@ void affichageMenuGo(){
       Serial.println("MENU GO");
     #endif
   }
+}
+
+void ISR_clic(){
+  interrupt_time = millis();
+  if( (interrupt_time - last_interrupt_time) > BOUNCING_DELAY ) {
+    clic=true;
+  }
+  last_interrupt_time = interrupt_time;
 }
 
 void ISR_encoder(){
