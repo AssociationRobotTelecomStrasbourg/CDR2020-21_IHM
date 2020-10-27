@@ -32,27 +32,31 @@ Ecran initialisation (0:0) -> Menu principal(1:0):
                                 -> Retour vers menu principal (posEncoder = 5)
 --------------------------------------
  */
-void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool refreshScreen, LiquidCrystal_I2C &lcd){
+void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool &refreshScreen, LiquidCrystal_I2C &lcd){
     //(A:B) = (0:0) -> Menu d'initialisation
     #ifdef debug
-        Serial.print("MenuA|MenuB: ");
+        Serial.print("MenuA|MenuB|refreshScreen: ");
         Serial.print(menuA);
         Serial.print("|");
-        Serial.println(menuB);
+        Serial.print(menuB);
+        Serial.print("|");
+        Serial.println(refreshScreen);
+        Serial.print("posEncoder : ");
+        Serial.println(posEncoder);
         delay(100);
     #endif
     if(menuA == 0 && menuB == 0 && clic){
         //On sort de l'ecran d'initialisation
         menuA = 1;
         clic = 0;
-        refreshScreen = 1;
+        refreshScreen = true;
     }
     if(menuA == 1 && menuB == 0){
         /* Pour le menu principal */
         if(refreshScreen){
             /* Pour éviter l'effet de clignotement, on doit faire en sorte 
             que les caractères fixes de l'écran ne soit rafraichis qu'une seule fois, a chaque transition */
-            refreshScreen = 0;
+            refreshScreen = false;
             lcd.clear();
             displayMenu0(lcd);
         }
@@ -64,13 +68,18 @@ void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool r
             case 0:
                 /* On est sur la ligne "GoMatch" */
                 menuA = 2;
-                refreshScreen = 1;
+                refreshScreen = true;
                 break;
 
             case 1:
                 /* On est sur la ligne "Menu Test" */
                 menuA = 3;
-                refreshScreen = 1;
+                refreshScreen = true;
+                #ifdef debug
+                    Serial.println("Vers menu test....");
+                    Serial.print("refresh: ");
+                    Serial.println(refreshScreen);
+                #endif
                 break;
             
             default:
@@ -84,7 +93,7 @@ void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool r
     if(menuA == 3 && menuB == 0){
         //Menu Test principal
         if(refreshScreen){
-            refreshScreen = 0;
+            refreshScreen = false;
             lcd.clear();
             displayMenuTest0(lcd);
         }
@@ -95,23 +104,23 @@ void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool r
             case 0:
                 /* Test lidars fixes */
                 menuB = 1;
-                refreshScreen = 1;
+                refreshScreen = true;
                 break;
             case 1:
                 /* Test servos */
                 menuB = 2;
-                refreshScreen = 1;
+                refreshScreen = true;
                 break;
             case 2:
                 /* test steppers */
                 menuB = 3;
-                refreshScreen = 1;
+                refreshScreen = true;
                 break;
             case 3:
                 /* bouton retour */
                 menuA = 1;
                 menuB = 0;
-                refreshScreen = 1;
+                refreshScreen = true;
                 break;
             
             default:

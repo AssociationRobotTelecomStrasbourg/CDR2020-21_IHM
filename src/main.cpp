@@ -146,8 +146,6 @@ void loop(){
   rotation(rot,posEncoder); //fonction de decodage de l'encodeur incremental
   menuMEF(posEncoder,clic,menuA,menuB,refreshScreen,lcd);
   displayCursor(posEncoder,menuA,lcd);
-
-
 }
 /* 
 void affichageMenu0(){
