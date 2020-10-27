@@ -3,15 +3,15 @@
 
 #include <Arduino.h>
 #include "LiquidCrystal_I2C.h"
-
 void affichageMenu0();
 void affichageMenuGo();
 
-void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool &refreshScreen, LiquidCrystal_I2C &lcd);
+void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool &refreshScreen, LiquidCrystal_I2C &lcd, bool &areneSide, bool &goMatch);
 
 void displayCursor(int &posEncoder, const uint8_t &menuA, LiquidCrystal_I2C &lcd);
 void displayMenu0(LiquidCrystal_I2C &lcd);
 void displayMenuTest0(LiquidCrystal_I2C &lcd);
+void displayGoMatch(LiquidCrystal_I2C &lcd, bool areneSide);
 
 void displayMenuTest1();
 void displayMenuTest2();

@@ -20,6 +20,8 @@ bool rot;
 bool refreshScreen;
 uint8_t menuA;
 uint8_t menuB;
+bool goMatch;
+bool areneSide;
 
 bool menu0; //affichage du menu principal
 bool menuGO; //affichage du menu d'attente de départ
@@ -68,12 +70,20 @@ void setup(){
   delay(2000);
 
   lcd.setCursor(0,0);
+
+  #ifndef debug_isolate
   while(Serial.available()==0){
     //attente reception message
   }
   lcd.clear();
+  msg = Serial.read(); //Lecture du buffer 
+  #endif
 
-  msg = Serial.read();
+  #ifdef debug_isolate
+    msg = 0x7E;
+    lcd.clear();
+  #endif
+
   if(msg == 0x7E){
     //Reception du message OK STRT
     lcd.print("STRT OK");
@@ -97,6 +107,7 @@ void setup(){
 
   lcd.setCursor(0,2);
 
+  #ifndef debug_isolate
   while(Serial.available()<2){
     //attente reception tension batterie
     #ifdef debug
@@ -105,6 +116,7 @@ void setup(){
     #endif
     delay(100);
   }
+  #endif
   tension_batterie_raw = (Serial.read()<<8)|Serial.read();
   #ifdef debug
     Serial.println("value: ");
@@ -115,6 +127,7 @@ void setup(){
   lcd.print(tension_batterie);
   lcd.print("V");
 
+  #ifndef debug_isolate
   while(Serial.available()<1){
     #ifdef debug
       Serial.print("Lidars fixes: ");
@@ -122,6 +135,8 @@ void setup(){
     #endif
     delay(100);
   }
+  #endif
+
   N_lidars_fixes = Serial.read();
   lcd.setCursor(0,3);
   lcd.print("N Lidars ok: ");
@@ -143,9 +158,21 @@ void setup(){
 
 void loop(){
   //0x66 vers strat -> attente tirette
+  if(!goMatch){
   rotation(rot,posEncoder); //fonction de decodage de l'encodeur incremental
-  menuMEF(posEncoder,clic,menuA,menuB,refreshScreen,lcd);
+  menuMEF(posEncoder,clic,menuA,menuB,refreshScreen,lcd, areneSide, goMatch);
   displayCursor(posEncoder,menuA,lcd);
+  }
+  else{
+    if(refreshScreen){
+      refreshScreen = false;
+      lcd.clear();
+      lcd.cursor_off();
+      lcd.setCursor(7,1);
+      lcd.print("MATCH!");
+      Serial.write(0x66);
+    }
+  }
 }
 /* 
 void affichageMenu0(){

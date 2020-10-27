@@ -32,7 +32,7 @@ Ecran initialisation (0:0) -> Menu principal(1:0):
                                 -> Retour vers menu principal (posEncoder = 5)
 --------------------------------------
  */
-void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool &refreshScreen, LiquidCrystal_I2C &lcd){
+void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool &refreshScreen, LiquidCrystal_I2C &lcd, bool &areneSide, bool &goMatch){
     //(A:B) = (0:0) -> Menu d'initialisation
     #ifdef debug
         Serial.print("MenuA|MenuB|refreshScreen: ");
@@ -89,6 +89,33 @@ void menuMEF(int &posEncoder, bool &clic, uint8_t &menuA, uint8_t &menuB, bool &
     }
     if(menuA == 2 && menuB == 0){
         //Menu GoMatch
+        if(refreshScreen){
+            refreshScreen = false;
+            lcd.clear();
+            displayGoMatch(lcd, areneSide);
+        }
+        if(clic){
+            clic = 0;
+            switch (posEncoder)
+            {
+            case 0:
+                /* Alors on change de côté de l'arène */
+                refreshScreen = 1;
+                areneSide = !areneSide;
+                break;
+            case 2:
+                /* Le match commence */
+                goMatch = true;
+                refreshScreen = 1;
+            case 3:
+                /* Retour menu principal */
+                refreshScreen = 1;
+                menuB = 0;
+                menuA = 1;
+            default:
+                break;
+            }
+        }
     }
     if(menuA == 3 && menuB == 0){
         //Menu Test principal
@@ -160,6 +187,29 @@ void displayMenuTest0(LiquidCrystal_I2C &lcd){
     lcd.print("Test Servos");
     lcd.setCursor(1,2);
     lcd.print("Test Steppers");
+    lcd.setCursor(1,3);
+    lcd.print("RETOUR");
+}
+
+void displayGoMatch(LiquidCrystal_I2C &lcd, bool areneSide){
+    lcd.setCursor(1,0);
+    lcd.print("Side : ");
+    switch (areneSide)
+    {
+    case false:
+        /* On est du côté gauche */
+        lcd.print("Gauche");
+        break;
+    case true:
+        /* On est du côté droit */
+        lcd.print("Droit ");
+        break;
+    default:
+        break;
+    }
+
+    lcd.setCursor(1,2);
+    lcd.print("GO MATCH ! ");
     lcd.setCursor(1,3);
     lcd.print("RETOUR");
 }
