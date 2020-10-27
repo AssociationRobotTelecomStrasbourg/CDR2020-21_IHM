@@ -132,7 +132,7 @@ void displayCursor(int &posEncoder, const uint8_t &menuA, LiquidCrystal_I2C &lcd
         posEncoder = 0;
     }
     else if(posEncoder > 3){
-        posEncoder = 4;
+        posEncoder = 3;
     }
     
 }
